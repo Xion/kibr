@@ -42,7 +42,6 @@ Library
   build-depends   :
     { acid-state           == 0.6.*
     , base                 == 4.*
-    , blaze-html           >= 0.4.2.0 && < 0.5
     , containers           == 0.4.*
     , css                  == 0.*
     , data-lens-fd         == 2.0.*
@@ -56,7 +55,9 @@ Library
     , ixset                == 1.0.*
     , mtl                  == 2.*
     , safecopy             == 0.6.*
+    , text                 == 0.11.*
     , web-routes           == 0.25.*
     , web-routes-happstack == 0.22.*
     , web-routes-th        == 0.20.*
+    , xhtml-combinators    == 0.3.*
     }

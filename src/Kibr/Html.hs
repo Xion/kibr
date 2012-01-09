@@ -5,48 +5,45 @@ module Kibr.Html where
 import Preamble
 
 import Data.Lens
-import Happstack.Server (ServerPartT)
-import System.IO (IO)
-import Text.Blaze
-import Text.Blaze.Html5
-import Text.Blaze.Html5.Attributes hiding (title)
+import Control.Monad.Identity
 import Text.Groom
+import Text.XHtmlCombinators.Strict
+import Text.XHtmlCombinators.Strict.Attributes hiding (title)
+import Text.XHtmlCombinators.Internal
 import Web.Routes
 
 import Language.Haskell.HsColour.ACSS (hscolour)
 
 import Kibr.Data.Sitemap
 
-import qualified Kibr.Data  as DB
+import qualified Data.Text as T
+import qualified Kibr.Data as DB
 
-type View = RouteT Sitemap (ServerPartT IO) Html
+type View x = RouteT Sitemap (XHtmlMT x Identity) ()
 
-linkCss :: AttributeValue -> Html
-linkCss url = link ! href url ! rel "stylesheet" ! type_ "text/css"
+linkCss :: (Functor t, Monad t) => T.Text -> XHtmlT t HeadContent
+linkCss url = link' [href url, rel "stylesheet", type_ "text/css"]
 
-linkTo :: ToValue a => a -> Html -> Html
-linkTo url = a ! href (toValue url)
+linkTo :: (Functor t, Monad t, XHtml9 c) => T.Text -> XHtmlT t AContent -> XHtmlT t c
+linkTo url = a' [href url]
 
-master :: View -> View
+master :: View BlockContent -> View Root
 master page =
   do
-    contents <- page
     stylesheet <- showURL Stylesheet
-    return . docTypeHtml $ do
-      head $ do
+    html $ do
+      head_ $ do
         title "Lojban Dictionary"
-        linkCss $ toValue stylesheet
+        linkCss $ T.pack stylesheet
         linkCss hscolourCss
-      body contents
+      body page
   where
     hscolourCss = "http://code.haskell.org/~malcolm/hscolour/hscolour.css"
 
-wordList :: [DB.Word] -> View
-wordList ws = do
-  wd <- forM ws $ \w -> do
+wordList :: [DB.Word] -> View BlockContent
+wordList ws =
+  dl . forM_ ws $ \w -> do
     let word = DB.word ^$ w
     wurl <- showURL $ Word word
-    return $ do
-      dt . linkTo wurl . toHtml $ word
-      dd . preEscapedString . hscolour False $ groom w
-  return . dl $ sequence_ wd
+    dt . linkTo (T.pack wurl) $ word
+    dd . hscolour False $ groom w
