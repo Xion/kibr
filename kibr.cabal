@@ -42,15 +42,17 @@ Library
   build-depends   :
     { acid-state           == 0.6.*
     , base                 == 4.*
-    , blaze-html           >= 0.4.2.0 && < 0.5
     , containers           == 0.4.*
     , css                  == 0.*
     , data-lens-fd         == 2.0.*
     , data-lens-template   == 2.1.*
     , groom                == 0.1.*
+    , happstack-hsp        == 6.2.*
     , happstack-server     == 6.*
     , hscolour             >= 1.19 && < 2.0
     , hslogger             == 1.1.*
+    , hsp                  == 0.6.*
+    , hsx                  == 0.9.*
     , HTF                  == 0.8.*
     , hxt                  == 9.1.*
     , ixset                == 1.0.*

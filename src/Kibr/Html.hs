@@ -1,52 +1,37 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -F -pgmF trhsx #-}
 
 module Kibr.Html where
 
 import Preamble
 
 import Data.Lens
-import Happstack.Server (ServerPartT)
-import System.IO (IO)
-import Text.Blaze
-import Text.Blaze.Html5
-import Text.Blaze.Html5.Attributes hiding (title)
+import HSP
 import Text.Groom
-import Web.Routes
 
 import Language.Haskell.HsColour.ACSS (hscolour)
 
 import Kibr.Data.Sitemap
 
-import qualified Kibr.Data  as DB
+import qualified Kibr.Data as DB
 
-type View = RouteT Sitemap (ServerPartT IO) Html
+master body =
+  <html>
+    <head>
+      <title>Lojban Dictionary</title>
+      <link href=Stylesheet rel="stylesheet" type="text/css"/>
+      <link href="http://code.haskell.org/~malcolm/hscolour/hscolour.css" rel="stylesheet" type="text/css"/>
+    </head>
+    <body>
+      <% body %>
+    </body>
+  </html>
 
-linkCss :: AttributeValue -> Html
-linkCss url = link ! href url ! rel "stylesheet" ! type_ "text/css"
-
-linkTo :: ToValue a => a -> Html -> Html
-linkTo url = a ! href (toValue url)
-
-master :: View -> View
-master page =
-  do
-    contents <- page
-    stylesheet <- showURL Stylesheet
-    return . docTypeHtml $ do
-      head $ do
-        title "Lojban Dictionary"
-        linkCss $ toValue stylesheet
-        linkCss hscolourCss
-      body contents
-  where
-    hscolourCss = "http://code.haskell.org/~malcolm/hscolour/hscolour.css"
-
-wordList :: [DB.Word] -> View
-wordList ws = do
-  wd <- forM ws $ \w -> do
-    let word = DB.word ^$ w
-    wurl <- showURL $ Word word
-    return $ do
-      dt . linkTo wurl . toHtml $ word
-      dd . preEscapedString . hscolour False $ groom w
-  return . dl $ sequence_ wd
+wordList ws =
+  <dl>
+    <%
+      forM_ ws $ \w -> do
+        let word = DB.word ^$ w
+        <dt><a href=(Word word)><% word %></a></dt>
+        <dd><% hscolour False $ groom w %></dd>
+    %>
+  </dl>
