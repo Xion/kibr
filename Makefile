@@ -4,13 +4,9 @@ all: hlint test
 build:
 	@cabal-dev install
 
-.PHONY: pkg-list
-pkg-list:
-	@ghc-pkg -f cabal-dev/packages-*.conf list
-
 .PHONY: test
 test: build
-	@cabal-dev/bin/kibr --test
+	@cabal-dev/bin/kibr test
 
 .PHONY: hlint
 hlint:
@@ -18,9 +14,9 @@ hlint:
 
 .PHONY: import
 import:
-	@cabal-dev/bin/kibr --import fixtures.xml
+	@cabal-dev/bin/kibr import fixtures.xml
 
 .PHONY: serve
 serve:
 	@echo "Launching server on http://localhost:8000/"
-	@cabal-dev/bin/kibr
+	@cabal-dev/bin/kibr http
